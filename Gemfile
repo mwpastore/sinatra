@@ -6,71 +6,89 @@
 #
 # If you have issues with a gem: `bundle install --without-coffee-script`.
 
-RUBY_ENGINE = 'ruby' unless defined? RUBY_ENGINE
+RUBY_ENGINE = 'ruby' unless defined?(RUBY_ENGINE)
 source 'https://rubygems.org' unless ENV['QUICK']
 gemspec
 
-gem 'rake'
 gem 'rack-test', '>= 0.6.2'
-gem "minitest", "~> 5.0"
+gem 'minitest', '~> 5.0'
 
 # Allows stuff like `tilt=1.2.2 bundle install` or `tilt=master ...`.
 # Used by the CI.
-repos  = {'tilt' => "rtomayko/tilt", 'rack' => "rack/rack"}
-
-%w[tilt rack].each do |lib|
-  dep = case ENV[lib]
+{
+  'tilt' => 'rtomayko/tilt',
+  'rack' => 'rack/rack'
+}.each do |lib, req|
+  dep = case (env = ENV[lib])
         when 'stable', nil then nil
-        when /(\d+\.)+\d+/ then "~> " + ENV[lib].sub("#{lib}-", '')
-        else {:github => repos[lib], :branch => dep}
+        when /(?:\d+\.)+\d+/ then '~> ' + env.sub("#{lib}-", '')
+        else {:github => req, :branch => env}
         end
   gem lib, dep
 end
 
-if RUBY_ENGINE == 'jruby'
-  gem 'nokogiri', '!= 1.5.0'
-  gem 'jruby-openssl'
-  gem 'trinidad'
+if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('1.9')
+  gem 'json', '< 2'
 end
 
-if RUBY_ENGINE == "ruby" and RUBY_VERSION > '1.9.2'
-  gem 'less', '~> 2.0'
-  gem 'therubyracer'
-  gem 'redcarpet'
-  gem 'wlang', '>= 2.0.1'
-  gem 'bluecloth'
-  gem 'rdiscount'
+if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('1.9.3')
   gem 'RedCloth'
-  gem 'puma'
-  gem 'net-http-server'
-  gem 'yajl-ruby'
-  gem 'nokogiri'
-  gem 'thin'
-  gem 'slim', '~> 2.0'
-  gem 'coffee-script', '>= 2.0'
-  gem 'rdoc'
-  gem 'kramdown'
-  gem 'maruku'
-  gem 'creole'
-  gem 'wikicloth'
-  gem 'markaby'
-  gem 'radius'
   gem 'asciidoctor'
-  gem 'liquid'
-  gem 'stylus'
-  gem 'rabl'
+  gem 'bluecloth'
   gem 'builder'
+  gem 'coffee-script', '>= 2.0'
+  gem 'creole'
   gem 'erubis'
   gem 'haml', '>= 3.0'
+  gem 'i18n'
+  gem 'kramdown'
+  gem 'less', '~> 2.0'
+  gem 'markaby'
+  gem 'maruku'
+  gem 'net-http-server'
+  gem 'puma'
+  gem 'rabl'
+  gem 'radius'
+  gem 'rake'
+  gem 'rdiscount'
+  gem 'rdoc'
+  gem 'redcarpet'
   gem 'sass'
+  gem 'slim', '~> 2.0'
+  gem 'stylus'
+  gem 'therubyracer'
+  gem 'thin'
+  gem 'wikicloth'
+  gem 'wlang', '>= 2.0.1'
+  gem 'yajl-ruby'
+else
+  gem 'i18n', '< 0.7'
+  gem 'mini_portile2', '< 2.0'
+  gem 'rake', '< 11'
 end
 
-if RUBY_ENGINE == "rbx"
+if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.1.0')
+  gem 'liquid'
+  gem 'nokogiri'
+else
+  gem 'liquid', '< 4'
+  gem 'nokogiri', '< 1.7'
+end
+
+if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')
+  gem 'activesupport'
+elsif Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('1.9.3')
+  gem 'activesupport', '< 5'
+else
+  gem 'activesupport', '< 4'
+end
+
+case RUBY_ENGINE
+when 'jruby'
+  gem 'jruby-openssl'
+  gem 'trinidad'
+when 'rbx'
   gem 'json'
   gem 'rubysl'
   gem 'rubysl-test-unit'
-end
-
-platforms :ruby_18, :jruby do
-  gem 'json' unless RUBY_VERSION > '1.9' # is there a jruby but 1.8 only selector?
 end

@@ -6,7 +6,7 @@ sudo: false
 
 before_install:
   - rvm get head
-  - gem install bundler
+  - gem install bundler -v 1.13.7
   - export CXX="g++-4.8"
 
 addons:
